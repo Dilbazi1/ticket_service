@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ticketapp.models import User,Profile,ChatMessage,CreateTask
+from ticketapp.models import User,Profile,ChatMessage,CreateTask,Room
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email']
@@ -14,3 +14,4 @@ admin.site.register(User, UserAdmin)
 admin.site.register( Profile,ProfileAdmin)
 admin.site.register( ChatMessage)
 admin.site.register( CreateTask)
+admin.site.register(Room)

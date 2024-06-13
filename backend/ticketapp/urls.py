@@ -7,6 +7,10 @@ from rest_framework_simplejwt.views import (
 )
 app_name = TicketappConfig.name
 urlpatterns = [
+    path('room/<int:pk>/', views.room, name='room'),
+    path('', views.index, name='index'),
+    # path("", views.index, name="index"),
+    # path("<str:room_name>/", views.room, name="room"),
     path('token/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', views.RegisterView.as_view(), name='auth_register'),
@@ -24,5 +28,9 @@ urlpatterns = [
     # Get profile
     path("profile/<int:pk>/", views.ProfileDetail.as_view()),
     path("search/<username>/", views.SearchUser.as_view()),
+    path('test1/', views.test),
+    path('1/',views.messagelist)
+    
 ]
 
+    

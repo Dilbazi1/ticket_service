@@ -4,7 +4,7 @@ from django.db.models import Q, OuterRef, Subquery
 
 from ticketapp.models import User,  Profile, ChatMessage, CreateTask
 
-from ticketapp.serializer import ProfileSerializer, MyTokenObtainPairSerializer, RegisterSerializer, CreateTaskSerializer, MessageSerializer
+from ticketapp.serializers import ProfileSerializer, MyTokenObtainPairSerializer, RegisterSerializer, CreateTaskSerializer, MessageSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -12,8 +12,16 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from asgiref.sync import sync_to_async
+from django.shortcuts import render, reverse, get_object_or_404
+from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect
+from .models import User, Room, ChatMessage
 
-
+def index(request):
+    return render(request, "ticketapp/index.html")
+def room(request, room_name):
+    return render(request, "chat/room.html", {"room_name": room_name})
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
@@ -132,3 +140,32 @@ class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CreateTaskSerializer
     queryset = CreateTask.objects.all()
     # permission_classes = [IsAuthenticated]
+
+
+
+
+def index(request):
+    if request.method == "POST":
+        name = request.POST.get("name", None)
+        if name:
+            room = Room.objects.create(name=name, host=request.user)
+            print(room.pk)
+            return HttpResponseRedirect(reverse("ticketapp:room", kwargs={"pk": room.pk}))
+    return render(request, 'ticketapp/index.html')
+
+
+def room(request, pk):
+    room: Room = get_object_or_404(Room, pk=pk)
+    messages:ChatMessage=ChatMessage.objects.filter(room=room.pk)
+    print(messages)
+    print('here')
+    return render(request, 'ticketapp/room.html', {
+        "room": room,
+        'messages':messages
+    })
+
+
+def test(request):
+    return render(request, 'ticketapp/test.html')  
+def messagelist(request):
+    return render(request, 'ticketapp/1.html')  

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generic Api Consumer</title>
+</head>
+<body>
+<button id="list">MessageList</button>
+
+
+
+<pre id="response"></pre>
+
+<script>
+    base_url =  'ws://localhost:8080/ws/ticketapp/inbox/'
+    {% comment %} const ws = new WebSocket("ws://localhost:8000/ws/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3MTgwMTM4NzEsInN1YiI6ImFjY2VzcyJ9.VgGEodDUUYaRobNnlivvrMF62Y-NK1vxACdPTGCpt8c") {% endcomment %}
+    const ws = new WebSocket(base_url);
+    ws.onmessage = function (e) {
+        document.getElementById("response").textContent = JSON.stringify(JSON.parse(e.data), undefined, 2);
+        console.log(e.data)
+    }
+
+  document.querySelector('#list').onclick = function (e) {
+        ws.send(JSON.stringify({
+            action: "list",
+            request_id: new Date().getTime()
+        }))
+    };
+   
+
+    
+
+   
+   
+
+    
+</script>
+</body>
+</html>

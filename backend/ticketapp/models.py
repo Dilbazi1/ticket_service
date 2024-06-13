@@ -20,6 +20,7 @@ class Profile(models.Model):
     bio = models.CharField(max_length=100)
     image = models.ImageField(upload_to="user_images", default="default.jpg")
     verified = models.BooleanField(default=False)
+    online_status=models.BooleanField(default=False)
     def save(self,*args,**kwargs):
         if self.full_name=="" or self.full_name==None:
             self.full_name=self.user.username
@@ -37,10 +38,17 @@ def save_user_profile(sender, instance, **kwargs):
 post_save.connect(create_user_profile, sender=User)
 post_save.connect(save_user_profile, sender=User)
 
+class Room(models.Model):
+    name = models.CharField(max_length=255, null=False, blank=False, unique=True)
+    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rooms")
+    current_users = models.ManyToManyField(User, related_name="current_rooms", blank=True)
 
+    def __str__(self):
+        return f"Room({self.name} {self.host})"
 
 
 class ChatMessage(models.Model):
+    room = models.ForeignKey("ticketapp.Room", on_delete=models.CASCADE, related_name="messages")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user")
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="sender")
     reciever = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="reciever")
@@ -48,10 +56,10 @@ class ChatMessage(models.Model):
     message = models.CharField(max_length=10000000000)
 
     is_read = models.BooleanField(default=False)
-    date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['date']
+        ordering = ['created_at']
         verbose_name_plural = "Message"
 
     def __str__(self):
@@ -66,6 +74,7 @@ class ChatMessage(models.Model):
     def reciever_profile(self):
         reciever_profile = Profile.objects.get(user=self.reciever)
         return reciever_profile
+    
 
 
 class CreateTask(models.Model):

@@ -1,4 +1,4 @@
-from ticketapp.models import User,  Profile, ChatMessage, CreateTask
+from ticketapp.models import User,  Profile, ChatMessage, CreateTask,Room
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
@@ -9,7 +9,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        
+        exclude=('password',)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -68,11 +69,27 @@ class ProfileSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     reciever_profile = ProfileSerializer(read_only=True)
     sender_profile = ProfileSerializer(read_only=True)
+    created_at_formatted = serializers.SerializerMethodField()
+  
 
+    def get_created_at_formatted(self, obj: ChatMessage):
+        return obj.created_at.strftime("%d-%m-%Y %H:%M:%S")
     class Meta:
         model = ChatMessage
-        fields = ['id', 'sender', 'reciever', 'reciever_profile', 'sender_profile', 'message', 'is_read', 'date']
+        exclude = []
 class CreateTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreateTask
         fields = '__all__'
+class RoomSerializer(serializers.ModelSerializer):
+    last_message = serializers.SerializerMethodField()
+    messages = MessageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Room
+        fields = ["pk", "name", "host", "messages", "current_users", "last_message"]
+        depth = 1
+        read_only_fields = ["messages", "last_message"]
+
+    def get_last_message(self, obj:Room):
+        return MessageSerializer(obj.messages.order_by('created_at').last()).data        
